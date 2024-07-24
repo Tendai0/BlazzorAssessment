@@ -1,0 +1,31 @@
+﻿@page "/enrolled-courses"
+@using Domain.Entity.CourseEntity
+@inject IEnrollmentService EnrollmentService
+@inject HttpClient Http
+
+<h3>Your Enrolled Courses</h3>
+
+@if (courses == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ul>
+        @foreach (var course in courses)
+        {
+            <li>@course.Name</li>
+        }
+    </ul>
+}
+
+@code {
+    private List<Course> courses;
+    private int studentId = 1; // This should be dynamically set based on the logged-in user
+
+    protected override async Task OnInitializedAsync()
+    {
+        courses = await Http.GetFromJsonAsync<List<Course>>($"api/enrollments/students/{studentId}/courses");
+    }
+}
+
