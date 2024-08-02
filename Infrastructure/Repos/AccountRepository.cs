@@ -37,6 +37,7 @@ namespace Infrastructure.Repos
                 {
                     new Claim(ClaimTypes.Name, user.Email),
                     new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimTypes.Role, (await userManager.GetRolesAsync(user)).FirstOrDefault().ToString()),
                     new Claim("Fullname", user.Name)
                 };
@@ -140,7 +141,6 @@ namespace Infrastructure.Repos
             }
             catch { }
         }
-
         public async Task<GeneralResponse> CreateRoleAsync(CreateRoleDTO model)
         {
             try

@@ -1,4 +1,5 @@
-﻿using Domain.Entity.CourseEntity;
+﻿using Application.Contracts;
+using Domain.Entity.CourseEntity;
 using Domain.EntityVM;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -10,25 +11,23 @@ namespace API.Controllers
     [ApiController]
     public class CoursesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ICourseRepo _courseRepository;
 
-        public CoursesController(AppDbContext context)
+        public CoursesController(ICourseRepo courseRepository)
         {
-            _context = context;
+            _courseRepository = courseRepository;
         }
 
-        [HttpGet("get-course")]
-        public async Task<ActionResult<List<CourseVM>>> GetCourses()
+        [HttpGet("get-course/{UserId}")]
+        public async Task<ActionResult<List<CourseVM>>> GetCourses(string UserId)
         {
-            var courses = await _context.Courses
-                .Select(c => new CourseVM
-                {
-                    Id = c.Id,
-                    Name = c.Name,
-                    Description = c.Description
-                })
-                .ToListAsync();
-
+            var courses = await _courseRepository.GetCoursesAsync(UserId);
+            return Ok(courses);
+        }
+        [HttpGet("registered-courses/{userId}")]
+        public async Task<ActionResult<List<CourseVM>>> GetRegisteredCourses(string userId)
+        {
+            var courses = await _courseRepository.GetRegisteredCoursesAsync(userId);
             return Ok(courses);
         }
 
@@ -40,18 +39,8 @@ namespace API.Controllers
                 return BadRequest();
             }
 
-            var course = new Course
-            {
-                Name = courseVM.Name,
-                Description = courseVM.Description
-            };
-
-            _context.Courses.Add(course);
-            await _context.SaveChangesAsync();
-
-            courseVM.Id = course.Id; // Set the ID to the newly created course's ID
-
-            return CreatedAtAction(nameof(GetCourses), new { id = course.Id }, courseVM);
+            var createdCourse = await _courseRepository.CreateCourseAsync(courseVM);
+            return CreatedAtAction(nameof(GetCourses), new { id = createdCourse.Id }, createdCourse);
         }
 
         [HttpPut("edit-course/{id}")]
@@ -62,32 +51,13 @@ namespace API.Controllers
                 return BadRequest();
             }
 
-            var course = await _context.Courses.FindAsync(id);
-
-            if (course == null)
-            {
-                return NotFound();
-            }
-
-            course.Name = courseVM.Name;
-            course.Description = courseVM.Description;
-
-            _context.Entry(course).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                await _courseRepository.UpdateCourseAsync(courseVM);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (KeyNotFoundException)
             {
-                if (!CourseExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return NoContent();
@@ -96,22 +66,16 @@ namespace API.Controllers
         [HttpDelete("delete-course/{id}")]
         public async Task<IActionResult> DeleteCourse(int id)
         {
-            var course = await _context.Courses.FindAsync(id);
-
-            if (course == null)
+            try
+            {
+                await _courseRepository.DeleteCourseAsync(id);
+            }
+            catch (KeyNotFoundException)
             {
                 return NotFound();
             }
 
-            _context.Courses.Remove(course);
-            await _context.SaveChangesAsync();
-
             return NoContent();
-        }
-      
-        private bool CourseExists(int id)
-        {
-            return _context.Courses.Any(e => e.Id == id);
         }
     }
 }

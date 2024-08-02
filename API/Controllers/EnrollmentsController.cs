@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Response;
+﻿using Application.Contracts;
+using Application.DTOs.Response;
 using Domain.Entity.CourseEntity;
 using Domain.EntityVM;
 using Infrastructure.Data;
@@ -11,71 +12,32 @@ namespace API.Controllers
     [ApiController]
     public class EnrollmentsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IEnrollRepo _enrollRepo;
 
-        public EnrollmentsController(AppDbContext context)
+        public EnrollmentsController(IEnrollRepo enrollRepo)
         {
-            _context = context;
+            _enrollRepo = enrollRepo;
         }
 
-        [HttpGet("courses-by-student/{studentId}")]
-        public async Task<ActionResult<List<CourseVM>>> GetCoursesByStudent(string studentId)
+        [HttpPost("enroll-course")]
+        public async Task<ActionResult> EnrollStudent([FromBody] EnrollmentVM request)
         {
-            var courses = await _context.Enrollments
-                .Where(e => e.UserId == studentId)
-                
-                .ToListAsync();
-
-            return Ok(courses);
-        }
-
-        [HttpGet("students-by-course/{courseId}")]
-        public async Task<ActionResult<List<Student>>> GetStudentsByCourse(int courseId)
-        {
-            var students = await _context.Enrollments
-                .Where(e => e.CourseId == courseId)             
-                .ToListAsync();
-
-            return Ok(students);
-        }
-
-        [HttpPost("enroll")]
-        public async Task<ActionResult> EnrollStudent(string studentId, int courseId, string action)
-        {
-            if (action == "register")
+            try
             {
-                // Register the student
-                var enrollment = new Enrollment
+                var result = await _enrollRepo.EnrollStudentAsync(request);
+                if (result)
                 {
-                    UserId = studentId,
-                    CourseId = courseId
-                };
-
-                _context.Enrollments.Add(enrollment);
-                await _context.SaveChangesAsync();
-
-                return Ok();
-            }
-            else if (action == "unregister")
-            {
-                // Unregister the student
-                var enrollment = await _context.Enrollments
-                    .FirstOrDefaultAsync(e => e.UserId == studentId && e.CourseId == courseId);
-
-                if (enrollment == null)
-                {
-                    return NotFound();
+                    return Ok();
                 }
-
-                _context.Enrollments.Remove(enrollment);
-                await _context.SaveChangesAsync();
-
-                return Ok();
+                else
+                {
+                    return NotFound(); // Or another appropriate status code
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return BadRequest();
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
-        } 
+        }
     }
 }

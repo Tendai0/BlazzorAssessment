@@ -1,6 +1,7 @@
 ﻿@page "/newcontent/register-course"
 @using Domain.Entity.CourseEntity
 @using Domain.EntityVM
+@using System.Security.Claims;
 @inject ICourseService CourseService
 @inject IEnrollmentService EnrollmentService
 <h3>Register for a Course</h3>
@@ -39,40 +40,53 @@
     }
 </div>
 @code {
-
-    private IEnumerable<CourseVM> Courses { get; set; } = [];
-    private EnrollmentVM courseModel = new EnrollmentVM();
+    private IEnumerable<CourseVM> Courses;
     private string userId;
-    private int selectedCourseId;
 
     protected override async Task OnInitializedAsync()
     {
-        Courses = await CourseService.GetCoursesAsync();
+        await InitializeUserAsync();
+        await LoadCoursesAsync();
     }
 
-  private async Task RegisterClicked(CourseVM course)
-  {
-     var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-     var user = authState.User;
+    private async Task InitializeUserAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
 
-     if (user.Identity.IsAuthenticated)
-     {
-         userId = user.FindFirst(u => u.Type.Contains("Fullname"))?.Value;
-         var action = course.IsRegistered ? "unregister" : "register";
+        if (user.Identity.IsAuthenticated)
+        {
+            userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        }
+    }
+
+    private async Task LoadCoursesAsync()
+    {
+        if (!string.IsNullOrEmpty(userId))
+        {
+            Courses = await CourseService.GetCoursesAsync(userId);
+        }
+    }
+
+    private async Task RegisterClicked(CourseVM course)
+    {
+        if (!string.IsNullOrEmpty(userId))
+        {
+            var action = course.IsRegistered ? "unregister" : "register";
             var response = await EnrollmentService.EnrollStudentAsync(userId, course.Id, action);
-            
 
-         if (response.Flag)
-         {
-             course.IsRegistered = !course.IsRegistered;
-             Console.WriteLine($"Successfully {action}ed for course: {course.Name}");
-         }
-         else
-         {
-             Console.WriteLine($"Failed to {action} for course: {response.Message}");
-         }
-        StateHasChanged();
-     }
-  }
+            if (response.Flag)
+            {
+                course.IsRegistered = !course.IsRegistered;
+                Console.WriteLine($"Successfully {action}ed for course: {course.Name}");
+            }
+            else
+            {
+                Console.WriteLine($"Failed to {action} for course: {response.Message}");
+            }
+
+            StateHasChanged();
+        }
+    }
 }
 

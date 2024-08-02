@@ -22,13 +22,12 @@ namespace Application.Extensions
         }
 
         public const string AddCourse = "api/courses/create-course";
-        public const string GetCourse = "api/courses/get-course";
+        public const string GetRegisteredCourse = "api/courses/registered-courses";
+        public const string GetCourse = "api/courses/get-course"; 
         public const string EditCourse = "api/courses/edit-course";
         public const string DeleteCourse = "api/courses/delete-course";
 
-        public const string GetCoursesByStudent = "api/enrollment/courses/{0}";
-        public const string GetStudentsByCourse = "api/enrollment/students/{0}";
-        public const string EnrollStudent = "api/courses/enroll";
+        public const string EnrollStudent = "/api/Enrollments/enroll-course";
         
     }
 }

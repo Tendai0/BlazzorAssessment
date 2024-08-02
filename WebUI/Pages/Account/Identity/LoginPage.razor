@@ -60,14 +60,30 @@
         try
         {
             ResetButtons();
+
             var response = await accountService.LoginAccountAsync(LoginModel);
             if (response.Flag)
             {
                 var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthStateProvider;
                 await customAuthStateProvider.UpdateAuthenticationState(new LocalStorageDTO()
                     { Token = response.Token, Refresh = response.RefreshToken });
+                var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+                var user = authState.User;
 
-                NavManager.NavigateTo(uri: "content/home", true);
+                // Navigate based on user role
+                if (user.IsInRole(Constant.Role.Admin)) 
+                {
+                    NavManager.NavigateTo(uri: "content/home", true);
+                }
+                else if (user.IsInRole(Constant.Role.User)) 
+                {
+                    NavManager.NavigateTo(uri: "newcontent/registered-courses", true);
+                }
+                else
+                {
+                    // Handle other roles or default case if needed
+                    NavManager.NavigateTo(uri: "content/home", true); // Default to home or handle as needed
+                }
             }
             else
             {
@@ -108,8 +124,21 @@
     {
         try
         {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
             if ((await ClientAuthState!).User.Identity!.IsAuthenticated == true)
-                NavManager.NavigateTo("content/home", false, true);
+            {
+                if (user.IsInRole(Constant.Role.User))
+                {
+                    NavManager.NavigateTo("newcontent/registered-courses", false, true);
+                }
+                else
+                {
+                    NavManager.NavigateTo("content/home", false, true);
+                }
+               
+            }
+   
         }
         catch { }
     }

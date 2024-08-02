@@ -16,8 +16,6 @@ namespace Infrastructure.Data
             optionsBuilder.UseInMemoryDatabase(databaseName: "InMemoryDb");
         }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
-      
-        public DbSet<Student> Students { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
     }

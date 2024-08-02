@@ -53,6 +53,8 @@ namespace Infrastructure.DependencyInjection
                         .AllowCredentials());
             });
             services.AddScoped<IAccount, AccountRepository>();
+            services.AddScoped<IEnrollRepo, EnrollRepo>();
+            services.AddScoped<ICourseRepo, CourseRepo>();
             return services;
         }
     }

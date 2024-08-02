@@ -19,9 +19,10 @@ namespace Application.Services
 
         private static GeneralResponse ErrorOperation(string message) => new(false, message);
 
-        public async Task<IEnumerable<CourseVM>> GetCoursesAsync()
-            => await (await PrivateClient()).GetFromJsonAsync<IEnumerable<CourseVM>>(Constant.GetCourse);
-
+        public async Task<IEnumerable<CourseVM>> GetCoursesAsync(string UserId)
+            => await (await PrivateClient()).GetFromJsonAsync<IEnumerable<CourseVM>>($"{Constant.GetCourse}/{UserId}");
+        public async Task<IEnumerable<CourseVM>> GetRegisteredCoursesAsync(string UserId)
+            => await (await PrivateClient()).GetFromJsonAsync<IEnumerable<CourseVM>>($"{Constant.GetRegisteredCourse}/{UserId}");
         public async Task<GeneralResponse> AddCourseAsync(CourseVM model)
         {
             var result = await (await PrivateClient()).PostAsJsonAsync(Constant.AddCourse, model);

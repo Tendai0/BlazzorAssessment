@@ -50,9 +50,9 @@ namespace Application.Extensions
             [
                 new Claim(ClaimTypes.Name, claims.UserName),
                 new Claim(ClaimTypes.Email, claims.Email),
+                new Claim(ClaimTypes.NameIdentifier, claims.UserId),
                 new Claim(ClaimTypes.Role, claims.Role),
-                new Claim("Fullname", claims.Fullname),
-                //new Claim("UserId", claims.UserId)
+                new Claim("Fullname", claims.Fullname),               
             ], Constant.AuthenticationType));
         }
         private static UserClaimsDTO DecryptToken(string jwtToken)
@@ -66,10 +66,11 @@ namespace Application.Extensions
 
                 var name = token.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Name)!.Value;
                 var email = token.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Email)!.Value;
+                var userId = token.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.NameIdentifier)!.Value;
                 var role = token.Claims.FirstOrDefault(_ => _.Type == ClaimTypes.Role)!.Value;
                 var fullname = token.Claims.FirstOrDefault(_ => _.Type == "Fullname")!.Value;
                // var userId = token.Claims.FirstOrDefault(c => c.Type == "sub")!.Value;
-                return new UserClaimsDTO(fullname, name, email, role);
+                return new UserClaimsDTO(fullname, name, email, role,userId);
             }
             catch
             {

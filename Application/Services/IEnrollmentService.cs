@@ -13,7 +13,6 @@ namespace Application.Services
     public interface IEnrollmentService
     {
         Task<GeneralResponse> EnrollStudentAsync(string studentId, int courseId,string action);
-        Task<IEnumerable<CourseVM>> GetCoursesByStudentAsync(int studentId);
-        Task<IEnumerable<CourseVM>> GetStudentsByCourseAsync(int courseId);
+        
     }
 }
