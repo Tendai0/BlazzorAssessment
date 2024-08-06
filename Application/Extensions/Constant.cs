@@ -23,7 +23,8 @@ namespace Application.Extensions
 
         public const string AddCourse = "api/courses/create-course";
         public const string GetRegisteredCourse = "api/courses/registered-courses";
-        public const string GetCourse = "api/courses/get-course"; 
+        public const string GetCourse = "api/courses/get-course";
+
         public const string EditCourse = "api/courses/edit-course";
         public const string DeleteCourse = "api/courses/delete-course";
 

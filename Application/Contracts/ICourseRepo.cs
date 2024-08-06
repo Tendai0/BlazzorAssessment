@@ -1,4 +1,5 @@
-﻿using Domain.EntityVM;
+﻿using Application.DTOs.Response;
+using Domain.EntityVM;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,8 @@ namespace Application.Contracts
     {
         Task<List<CourseVM>> GetRegisteredCoursesAsync(string userId);
         Task<List<CourseVM>> GetCoursesAsync(string userId);
-        Task<CourseVM> CreateCourseAsync(CourseVM courseVM);
-        Task UpdateCourseAsync(CourseVM courseVM);
-        Task DeleteCourseAsync(int id);
+        Task<GeneralResponse> CreateCourseAsync(CourseVM courseVM);
+        Task<GeneralResponse> UpdateCourseAsync(CourseVM courseVM);
+        Task<GeneralResponse> DeleteCourseAsync(int id);
     }
 }

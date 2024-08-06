@@ -1,4 +1,5 @@
 ﻿using Application.Contracts;
+using Application.DTOs.Response;
 using Domain.Entity.CourseEntity;
 using Domain.EntityVM;
 using Infrastructure.Data;
@@ -32,19 +33,18 @@ namespace API.Controllers
         }
 
         [HttpPost("create-course")]
-        public async Task<ActionResult<CourseVM>> CreateCourse(CourseVM courseVM)
+        public async Task<ActionResult<GeneralResponse>> CreateCourse(CourseVM courseVM)
         {
             if (courseVM == null)
             {
                 return BadRequest();
             }
-
-            var createdCourse = await _courseRepository.CreateCourseAsync(courseVM);
-            return CreatedAtAction(nameof(GetCourses), new { id = createdCourse.Id }, createdCourse);
+            var createdCourseResponse = await _courseRepository.CreateCourseAsync(courseVM);
+            return Ok(createdCourseResponse);
         }
 
         [HttpPut("edit-course/{id}")]
-        public async Task<IActionResult> UpdateCourse(int id, CourseVM courseVM)
+        public async Task<ActionResult<GeneralResponse>> UpdateCourse(int id, CourseVM courseVM)
         {
             if (id != courseVM.Id)
             {
@@ -53,29 +53,29 @@ namespace API.Controllers
 
             try
             {
-                await _courseRepository.UpdateCourseAsync(courseVM);
+                return await _courseRepository.UpdateCourseAsync(courseVM);
             }
             catch (KeyNotFoundException)
             {
                 return NotFound();
             }
 
-            return NoContent();
+             
         }
 
         [HttpDelete("delete-course/{id}")]
-        public async Task<IActionResult> DeleteCourse(int id)
+        public async Task<ActionResult<GeneralResponse>> DeleteCourse(int id)
         {
             try
             {
-                await _courseRepository.DeleteCourseAsync(id);
+                return await _courseRepository.DeleteCourseAsync(id);
             }
             catch (KeyNotFoundException)
             {
                 return NotFound();
             }
 
-            return NoContent();
+            
         }
     }
 }

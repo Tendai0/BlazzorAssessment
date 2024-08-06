@@ -1,4 +1,5 @@
 ﻿using Application.Contracts;
+using Application.DTOs.Response;
 using Domain.Entity.CourseEntity;
 using Domain.EntityVM;
 using Infrastructure.Data;
@@ -19,7 +20,7 @@ namespace Infrastructure.Repos
         {
             _context = context;
         }
-
+        private static GeneralResponse OperationSuccessResponse(string message) => new(true, message);
         public async Task<List<CourseVM>> GetCoursesAsync(string userId)
         {
             return await _context.Courses
@@ -49,7 +50,7 @@ namespace Infrastructure.Repos
             return courses;
         }
 
-        public async Task<CourseVM> CreateCourseAsync(CourseVM courseVM)
+        public async Task<GeneralResponse> CreateCourseAsync(CourseVM courseVM)
         {
             if (courseVM == null)
             {
@@ -64,12 +65,10 @@ namespace Infrastructure.Repos
 
             _context.Courses.Add(course);
             await _context.SaveChangesAsync();
-
-            courseVM.Id = course.Id;
-            return courseVM;
+            return OperationSuccessResponse("Course data saved");
         }
 
-        public async Task UpdateCourseAsync(CourseVM courseVM)
+        public async Task<GeneralResponse> UpdateCourseAsync(CourseVM courseVM)
         {
             if (courseVM == null)
             {
@@ -88,9 +87,10 @@ namespace Infrastructure.Repos
 
             _context.Entry(course).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+            return OperationSuccessResponse("Course data updated");
         }
 
-        public async Task DeleteCourseAsync(int id)
+        public async Task<GeneralResponse> DeleteCourseAsync(int id)
         {
             var course = await _context.Courses.FindAsync(id);
 
@@ -101,6 +101,7 @@ namespace Infrastructure.Repos
 
             _context.Courses.Remove(course);
             await _context.SaveChangesAsync();
+            return OperationSuccessResponse("Coursee data deleted");
         }
     }
 }
